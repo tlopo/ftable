@@ -15,20 +15,20 @@ our $dollar="<dollar>";
 our $pipe="|";
 our $plus="+";
 our $minus="-";
+our $FS=',';
 
 my %h;
 if ($#ARGV >= 0){
-	my $lf;
-	my $cf;
-	my $rf;
-	my $nb='';
+	my $lf; my $cf; my $rf;
+	my $nb=''; 
 
 	GetOptions(	'l|left:s'         => \$lf,
         	   	'r|right:s'        => \$rf,
            		'c|center:s'       => \$cf,
+           		'F:s'       	   => \$FS,
            		'n|noborder'       => \$nb,
           	);
-	%h=get_details($lf,$cf,$rf,$nb);
+	%h=get_details($lf,$cf,$rf,$nb,$FS);
 }else {
 	%h=get_details();
 }
@@ -59,7 +59,7 @@ sub get_translated {
 
     foreach my $i ( @a ){
         my $b=$i;
-        $i =~ s/,/$comma/g; 
+        $i =~ s/$FS/$comma/g; 
         $h{$b} = $i; 
     }
 
@@ -85,10 +85,18 @@ sub split_csv {
 
     my $translated = get_translated($qf,$str);
     
-    @a =  split (/,/,$translated);
+    @a =  split (/$FS/,$translated);
  
     foreach my $i ( @a ){
-            $i =~ s/$comma/,/g;
+	    my $safe_fs=$FS;
+	    switch($safe_fs) {
+	    	case '\.' {$safe_fs =~ s/\\//g;}
+	    	case '\t' {$safe_fs =~ s/\\t/\t/g;}
+	    	case '\s' {$safe_fs =~ s/\\s/\t/g;}
+		
+	    }
+
+            $i =~ s/$comma/$safe_fs/eg;
             $i =~ s/$dollar/\$/g;
             $i =~ s/<op>/\(/g;
             $i =~ s/<cp>/\)/g;
@@ -97,6 +105,7 @@ sub split_csv {
             $i =~ s/\s+/ /g;
     }
 
+		print Dumper(@a);
     return @a;
 }
 
@@ -169,6 +178,7 @@ sub print_center {
 sub get_details {
 	my @align = get_align($_[0],$_[1],$_[2]);
 	my $nb = $_[3];
+	my $FS = $_[4];
 	my @b;
 	my @a;
 	my @length;
@@ -201,6 +211,7 @@ sub get_details {
 			align => \@align,
 			nb => $nb,
 			n_col => $n_col,
+			FS => $FS,
 		);
 	return %h;
 }
