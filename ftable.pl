@@ -16,6 +16,27 @@ our $pipe="|";
 our $plus="+";
 our $minus="-";
 
+my %h;
+if ($#ARGV >= 0){
+	my $lf;
+	my $cf;
+	my $rf;
+	my $nb='';
+
+	GetOptions(	'l|left:s'         => \$lf,
+        	   	'r|right:s'        => \$rf,
+           		'c|center:s'       => \$cf,
+           		'n|noborder'       => \$nb,
+          	);
+	%h=get_details($lf,$cf,$rf,$nb);
+}else {
+	%h=get_details();
+}
+print_table(\%h);
+
+
+
+
 sub get_quoted_fields {
     my $str1 = $_[0];
     my $qf;
@@ -151,6 +172,7 @@ sub get_details {
 	my @b;
 	my @a;
 	my @length;
+	my $n_col=0;
 	my $l=0; 
 	while (<>){
 		@a= split_csv("$_");
@@ -169,6 +191,7 @@ sub get_details {
 			}	
 			$c++; 
 		}
+		if ( $c > $n_col ){ $n_col=$c;}
 		$l++; 
 	
 	}
@@ -177,6 +200,7 @@ sub get_details {
 			length  => \@length,
 			align => \@align,
 			nb => $nb,
+			n_col => $n_col,
 		);
 	return %h;
 }
@@ -188,13 +212,17 @@ sub print_table{
 	my @length=@{$h{"length"}};
 	my @align=@{$h{"align"}};
 	my $nb=$h{"nb"};
+	my $n_col=$h{"n_col"};
 	my $a=0;
 	foreach my $line (@content){
 		$nb || print_border(\@length);
 		my $str; 
 		my $b=0;
-		foreach my $col (@{$content[$a]}){
-
+		#foreach my $col (@{$content[$a]}){
+		for ( my $z=0; $z < $n_col ; $z++ ){
+			#my $col = $content[$a][$z];
+			my $col = $content[$a][$z];
+			unless (defined($col)) { $col = ""}
 			$col =~ s/"//g;
 			$col =~ s/'//g;
 			my $l=$length[$b];
@@ -252,20 +280,3 @@ sub get_align {
 	return @align;
 }
 
-my %h;
-if ($#ARGV >= 0){
-	my $lf;
-	my $cf;
-	my $rf;
-	my $nb='';
-
-	GetOptions(	'l|left:s'         => \$lf,
-        	   	'r|right:s'        => \$rf,
-           		'c|center:s'       => \$cf,
-           		'n|noborder'       => \$nb,
-          	);
-	%h=get_details($lf,$cf,$rf,$nb);
-}else {
-	%h=get_details();
-}
-print_table(\%h);
