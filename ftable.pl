@@ -3,22 +3,11 @@
 # Date: 20/10/2013
 # Purpose: Print formatted table based on csv file
 
-# Usage:
-# ./ftable.pl <alignment> <filename>
-# example: 
-#	Left align 1st column, right align 2nd column and centralize 3rd column
-#		./ftable.pl 'l,r,c' test.cs
-#	Read from pipe
-#		app | ./ftable.pl -
-#	or
-#		app | ./ftable.pl 
-#
-
-
 use strict; 
 use warnings;
 use POSIX;
 use Switch;
+use Getopt::Long qw(:config no_ignore_case);
 use Data::Dumper;
 
 our $comma="<comma>";
@@ -157,10 +146,7 @@ sub print_center {
 }
 
 sub get_details {
-	my @align;
-	if ( defined($_[0]) ){
-		@align=split (/,/,"$_[0]");
-	}
+	my @align = get_align($_[0],$_[1],$_[2]);
 	my @b;
 	my @a;
 	my @length;
@@ -238,11 +224,44 @@ sub print_table{
 	print_border(\@length);
 }
 
+sub get_align {
+	my $lf = $_[0];
+	my $cf = $_[1];
+	my $rf = $_[2];
+	my @align;
+
+	defined($lf) && (my  @lf = split (/,/,$lf));
+	defined($cf) && (my  @cf = split (/,/,$cf));
+	defined($rf) && (my  @rf = split (/,/,$rf));
+
+	foreach my $i (@lf){
+		$align[$i] = "l";	
+	}
+
+	foreach my $i (@cf){
+		$align[$i] = "c";	
+	}
+
+	foreach my $i (@rf){
+		$align[$i] = "r";	
+	}
+	shift(@align);
+	return @align;
+}
+
 my %h;
 if ($#ARGV > 0){
-	%h=get_details( shift(@ARGV) );
+	my $lf;
+	my $cf;
+	my $rf;
+
+	GetOptions(	'l|left=s'         => \$lf,
+        	   	'r|right=s'        => \$rf,
+           		'c|center=s'       => \$cf,
+          	);
+
+	%h=get_details($lf,$cf,$rf);
 }else {
 	%h=get_details();
 }
-#print Dumper(\%h); 
 print_table(\%h);
