@@ -147,6 +147,7 @@ sub print_center {
 
 sub get_details {
 	my @align = get_align($_[0],$_[1],$_[2]);
+	my $nb = $_[3];
 	my @b;
 	my @a;
 	my @length;
@@ -174,7 +175,8 @@ sub get_details {
 	my %h= ( 
 			content => \@b,
 			length  => \@length,
-			align => \@align
+			align => \@align,
+			nb => $nb,
 		);
 	return %h;
 }
@@ -185,9 +187,10 @@ sub print_table{
 	my @content=@{$h{"content"}};
 	my @length=@{$h{"length"}};
 	my @align=@{$h{"align"}};
+	my $nb=$h{"nb"};
 	my $a=0;
 	foreach my $line (@content){
-		print_border(\@length);
+		$nb || print_border(\@length);
 		my $str; 
 		my $b=0;
 		foreach my $col (@{$content[$a]}){
@@ -195,7 +198,7 @@ sub print_table{
 			$col =~ s/"//g;
 			$col =~ s/'//g;
 			my $l=$length[$b];
-			print "$pipe";
+			$nb || print "$pipe";
 
 			my $left="false"; my $right="false";
 			my $center="false";
@@ -218,10 +221,10 @@ sub print_table{
 	
 			$b++;
 		}
-		print "$pipe\n";
+		unless ($nb) {print "$pipe\n"}else{print "\n"}
 		$a++;
 	}
-	print_border(\@length);
+	$nb || print_border(\@length);
 }
 
 sub get_align {
@@ -250,17 +253,18 @@ sub get_align {
 }
 
 my %h;
-if ($#ARGV > 0){
+if ($#ARGV >= 0){
 	my $lf;
 	my $cf;
 	my $rf;
+	my $nb='';
 
-	GetOptions(	'l|left=s'         => \$lf,
-        	   	'r|right=s'        => \$rf,
-           		'c|center=s'       => \$cf,
+	GetOptions(	'l|left:s'         => \$lf,
+        	   	'r|right:s'        => \$rf,
+           		'c|center:s'       => \$cf,
+           		'n|noborder'       => \$nb,
           	);
-
-	%h=get_details($lf,$cf,$rf);
+	%h=get_details($lf,$cf,$rf,$nb);
 }else {
 	%h=get_details();
 }
