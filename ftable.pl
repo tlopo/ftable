@@ -48,26 +48,26 @@ sub get_quoted_fields {
 
 sub get_translated {
     my $qf = $_[0];
-    my $s= $_[1];
-    my @a; 
+    my $str= $_[1];
+    my @arr; 
     my %h; 
 
     if (defined ($qf)) {
-        @a = split(/$comma/,$qf);
+        @arr = split(/$comma/,$qf);
     }
 
-    foreach my $i ( @a ){
-        my $b=$i;
+    foreach my $i ( @arr ){
+        my $tmpvar=$i;
         $i =~ s/$FS/$comma/g; 
-        $h{$b} = $i; 
+        $h{$tmpvar} = $i; 
     }
 
     while ( my($key,$value) = each(%h) ){
         $key =~ s/\$/\\\$/g;
-        eval "\$s =~ s/$key/$value/g; ";
+        eval "\$str =~ s/$key/$value/g; ";
     }
   
-    return $s;
+    return $str;
 }
 
 sub split_csv {
@@ -108,59 +108,54 @@ sub split_csv {
 }
 
 sub fill_str {
-	my $a=$_[0];
-	my $b=$_[1];
-	my $c=0;
+	my $f_char=$_[0];
+	my $f_times=$_[1];
 	my $str;
-	while ( $c < $b){
-		$str.=$a;
-		$c++;
-	}
-	$str.="";
+	$str="$f_char"x$f_times;
 	return $str;
 }
 
 sub print_border {
-	my @l=@{$_[0]};
-	foreach my $i (@l){
+	my @length=@{$_[0]};
+	foreach my $i (@length){
 		unless (defined($i)){$i=1;}
 		print "$plus";
-		my $a=0;
-		while ( $a < ($i+2) ){
+		my $counter=0;
+		while ( $counter < ($i+2) ){
 			print "$minus";
-			$a++;
+			$counter++;
 		}
 	}
 	print "$pipe\n";
 }
 
 sub print_left {
-	my $l=$_[0];
+	my $length=$_[0];
 	my $col=$_[1];
-	unless (defined($l)){ $l="";}
+	unless (defined($length)){ $length="";}
 	unless (defined($col)){ $col="";}
-	my $str="printf ' %-".$l."s ','".$col."';";
+	my $str="printf ' %-".$length."s ','".$col."';";
 	eval $str
 }
 
 sub print_right {
-	my $l=$_[0];
+	my $length=$_[0];
 	my $col=$_[1];
-	unless (defined($l)){ $l="";}
+	unless (defined($length)){ $length="";}
 	unless (defined($col)){ $col="";}
-	my $str="printf ' %".$l."s ','".$col."';";
+	my $str="printf ' %".$length."s ','".$col."';";
 	eval $str
 }
 
 sub print_center {
-	my $l=$_[0];
+	my $length=$_[0];
 	my $col=$_[1];
 	my $str;
-	unless (defined($l)){ $l=1}
+	unless (defined($length)){ $length=1}
 	my $cl=length($col);
-	my $padding=(($l - $cl)/2);
+	my $padding=(($length - $cl)/2);
         my $lp; my $rp;
-	if ( (($l - $cl) % 2 ) == 0 ){
+	if ( (($length - $cl) % 2 ) == 0 ){
 		$lp=$padding;	
 		$rp=$padding;	
 	}else{
@@ -171,57 +166,57 @@ sub print_center {
 	my $l_str ; my $r_str;
 	$l_str=fill_str(" ",$lp);
 	$r_str=fill_str(" ",$rp);
-	$str="printf ' %".$l."s ','".$l_str.$col.$r_str."';";
+	$str="printf ' %".$length."s ','".$l_str.$col.$r_str."';";
 	eval $str;
 }
 
 sub get_details {
 	my @align = get_align($_[0],$_[1],$_[2]);
 	my @print = get_print($_[3]);
-	my @b;
-	my @a;
-	my @d;
+	my @content;
+	my @tmp_arr;
+	my @tmp_arr2;
 	my @length;
 	my $n_col=0;
-	my $l=0;
+	my $counter=0;
 	
 	my $p_print;
 	if(@print){ $p_print=1; }else{ $p_print=0;}
  
 	while (<>){
-		@a= split_csv("$_");
+		@tmp_arr= split_csv("$_");
 		unless( $p_print ){
-			for ( my $x=0 ; $x <= $#a; $x++){
-				$print[$x]=$x;	
+			for ( my $i=0 ; $i <= $#tmp_arr; $i++){
+				$print[$i]=$i;	
 			}
 		}
-		my $m=0;
-		foreach my $n (@print){
-			$d[$m] = $a[$n];
-			$m++
+		my $counter2=0;
+		foreach my $i (@print){
+			$tmp_arr2[$counter2] = $tmp_arr[$i];
+			$counter2++
 		}
-		my $c=0; 
-		foreach my $i (@d){
+		$counter2=0; 
+		foreach my $i (@tmp_arr2){
 				defined($i) && $i =~ s/^\s+//;
 				defined($i) && $i =~ s/\s+$//;
-				$b[$l][$c] = $i;
+				$content[$counter][$counter2] = $i;
 				my $li= length($i);
-				if ( defined( $length[$c] ) ){
-					if( $li > $length[$c] ) {
-						$length[$c]=$li;
+				if ( defined( $length[$counter2] ) ){
+					if( $li > $length[$counter2] ) {
+						$length[$counter2]=$li;
 					}
 				}else{
-					$length[$c]=$li;
+					$length[$counter2]=$li;
 				}	
-			$c++; 
+			$counter2++; 
 		}
-		if ( $c > $n_col ){ $n_col=$c;}
-		$l++; 
+		if ( $counter2 > $n_col ){ $n_col=$counter2;}
+		$counter++; 
 	
 	}
 
 	my %h= ( 
-			content => \@b,
+			content => \@content,
 			length  => \@length,
 			align => \@align,
 			print => \@print,
@@ -242,24 +237,23 @@ sub print_table{
 	my @print=@{$h{"print"}};
 	my $nb=$h{"nb"};
 	my $n_col=$h{"n_col"};
-	my $a=0;
+	my $counter=0;
 
-	#print Dumper(\@print);
 	foreach my $line (@content){
 		$nb || print_border(\@length);
 		my $str; 
-		my $b=0;
-		for ( my $z=0; $z < $n_col ; $z++ ){
-			my $col = $content[$a][$z];
+		my $counter2=0;
+		for ( my $i=0; $i < $n_col ; $i++ ){
+			my $col = $content[$counter][$i];
 			unless (defined($col)) { $col = ""}
 			$col =~ s/"//g;
 			$col =~ s/'//g;
-			my $l=$length[$b];
+			my $l=$length[$counter2];
 			$nb || print "$pipe";
 
 			my $left="false"; my $right="false";
 			my $center="false";
-			switch ($align[$b]){
+			switch ($align[$counter2]){
 				case "l" { $left="true";}
 				case "r" { $right="true";}
 				else  { $center="true";}
@@ -276,10 +270,10 @@ sub print_table{
 				print_center($l,$col);
 			}
 	
-			$b++;
+			$counter2++;
 		}
 		unless ($nb) {print "$pipe\n"}else{print "\n"}
-		$a++;
+		$counter++;
 	}
 	$nb || print_border(\@length);
 }
@@ -313,10 +307,10 @@ sub get_print {
 	my $print = $_[0];
 	my @print;
 	defined($print) && (my @a = split(/,/,$print));
-	my $c=1;
+	my $counter=1;
 	foreach my $i (@a){
-		$print[$c] = $i-1;
-		$c++;
+		$print[$counter] = $i-1;
+		$counter++;
 	}
 	shift(@print);
 	return @print;
