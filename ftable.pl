@@ -28,15 +28,13 @@ if ($#ARGV >= 0){
            		'p|print:s'       => \$print,
            		'F:s'       	   => \$FS,
            		'n|noborder'       => \$nb,
-          	);
+          	) || print_usage();
+
 	%h=get_details($lf,$cf,$rf,$print);
 }else {
 	%h=get_details();
 }
 print_table(\%h);
-
-
-
 
 sub get_quoted_fields {
     my $str1 = $_[0];
@@ -322,4 +320,39 @@ sub get_print {
 	}
 	shift(@print);
 	return @print;
+}
+
+sub print_usage {
+
+my $usage = << 'EOF';
+Usage: ftable [OPTIONS] [FILE]
+
+Options:
+  -l, --left
+        List of field numbers (separated by comma) to be left aligned
+
+  -r, --right
+        List of field numbers (separated by comma) to be right aligned
+
+  -c, --center 
+        List of field numbers (separated by comma) to be center aligned
+        It is default if no alignmnet provided
+
+  -p, --print
+        List of field numbers (separated by comma) to be printed and ordered
+
+  -n, --noborder 
+        Do not print border
+
+  -F, --field-separator
+        Field separator, if no specified "comma" (,) is the default value
+
+Examples:
+
+        ftable -F ':'  -p 3,1,6 /etc/passwd
+        ftable -l 1 -c 2,3 -r 4 /tmp/table.csv
+        ftable -n -F ':' /etc/passwd  
+EOF
+	print $usage;
+	exit 2;
 }
