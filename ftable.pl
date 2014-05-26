@@ -37,6 +37,7 @@ if ($#ARGV >= 0){
 print_table(\%h);
 
 sub get_quoted_fields {
+# this sub finds quoted fields
     my $str1 = $_[0];
     my $qf;
     while ( $str1 =~ /(["'].*?["'])/ ){
@@ -70,7 +71,8 @@ sub get_translated {
     return $str;
 }
 
-sub split_csv {
+sub special_split {
+#This sub splits strings but taking quoted fields in consideration
     my $str=$_[0];
     $str =~ s/\$/$dollar/g;
     $str =~ s/\(/<op>/g;
@@ -108,6 +110,7 @@ sub split_csv {
 }
 
 sub fill_str {
+# This sub fills the string with padding chars
 	my $f_char=$_[0];
 	my $f_times=$_[1];
 	my $str;
@@ -116,6 +119,7 @@ sub fill_str {
 }
 
 sub print_border {
+# This sub prints horizontal border
 	my @length=@{$_[0]};
 	foreach my $i (@length){
 		unless (defined($i)){$i=1;}
@@ -130,6 +134,8 @@ sub print_border {
 }
 
 sub print_left {
+#This sub prints fields with proper padding in the left side.
+#It takes two args, 1st length of the maximun field and field content.
 	my $length=$_[0];
 	my $col=$_[1];
 	unless (defined($length)){ $length="";}
@@ -139,6 +145,8 @@ sub print_left {
 }
 
 sub print_right {
+#This sub prints fields with proper padding in the right side.
+#It takes two args, 1st length of the maximun field and field content.
 	my $length=$_[0];
 	my $col=$_[1];
 	unless (defined($length)){ $length="";}
@@ -148,6 +156,8 @@ sub print_right {
 }
 
 sub print_center {
+#This sub prints fields with proper padding in the both sides.
+#It takes two args, 1st length of the maximun field and field content.
 	my $length=$_[0];
 	my $col=$_[1];
 	my $str;
@@ -171,6 +181,8 @@ sub print_center {
 }
 
 sub get_details {
+# This subs creates a hash containg the whole content of the table, alignment info and 
+# number of columns/ fields
 	my @align = get_align($_[0],$_[1],$_[2]);
 	my @print = get_print($_[3]);
 	my @content;
@@ -184,7 +196,7 @@ sub get_details {
 	if(@print){ $p_print=1; }else{ $p_print=0;}
  
 	while (<>){
-		@tmp_arr= split_csv("$_");
+		@tmp_arr= special_split("$_");
 		unless( $p_print ){
 			for ( my $i=0 ; $i <= $#tmp_arr; $i++){
 				$print[$i]=$i;	
@@ -215,17 +227,14 @@ sub get_details {
 	
 	}
 
-	my %h= ( 
-			content => \@content,
-			length  => \@length,
-			align => \@align,
-			print => \@print,
-			nb => $nb,
-			n_col => $n_col,
-			FS => $FS,
+	my %details= ( 
+			content => \@content, # content of the file
+			length  => \@length,  # Maximun length of fields
+			align => \@align,     # Alignment 
+			n_col => $n_col,      # Maximun number of columns/fields
 		);
 	
-	return %h;
+	return %details;
 }
 
 
@@ -234,8 +243,6 @@ sub print_table{
 	my @content=@{$h{"content"}};
 	my @length=@{$h{"length"}};
 	my @align=@{$h{"align"}};
-	my @print=@{$h{"print"}};
-	my $nb=$h{"nb"};
 	my $n_col=$h{"n_col"};
 	my $counter=0;
 
@@ -279,6 +286,7 @@ sub print_table{
 }
 
 sub get_align {
+# This sub creates an array with the alignment information
 	my $lf = $_[0];
 	my $cf = $_[1];
 	my $rf = $_[2];
@@ -304,6 +312,7 @@ sub get_align {
 }
 
 sub get_print {
+# This sub creates an array containing the field numbers  to be printed
 	my $print = $_[0];
 	my @print;
 	defined($print) && (my @a = split(/,/,$print));
