@@ -80,7 +80,6 @@ Right align first field and left align second field:
 +------+----------+--------------|
 | 1000 | ubuntu   | /home/ubuntu |
 +------+----------+--------------|
-
 ```
 Left align first two fields:
 ```
@@ -90,6 +89,15 @@ egrep 'www-data|ubuntu' /etc/passwd | ftable -F ':' -p 3,1,6 -l 1,2
 +------+----------+--------------|
 | 1000 | ubuntu   | /home/ubuntu |
 +------+----------+--------------|
+```
+ftable handle csv nicely, even when having comma inside quotes:
+```
+:~# echo -e 'a,b,c\naaa,bbb,ccc,ddd,"e,f,g,h"' | ftable
++-----+-----+-----+-----+---------|
+|  a  |  b  |  c  |     |         |
++-----+-----+-----+-----+---------|
+| aaa | bbb | ccc | ddd | e,f,g,h |
++-----+-----+-----+-----+---------|
 ```
 
 
