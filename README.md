@@ -100,6 +100,15 @@ ftable handle csv nicely, even when having comma inside quotes:
 +-----+-----+-----+-----+---------|
 ```
 
+#Installation
+
+Installing ftable is just a matter of downloading from github, making it executable and move somewhere into $PATH
+
+```
+wget https://raw.githubusercontent.com/tlopo/ftable/master/ftable.pl 
+chmod +x ftable.pl
+sudo mf ftable.pl /usr/local/bin/ftable
+```
 
 
 
