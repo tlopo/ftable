@@ -16,19 +16,20 @@ our $pipe="|";
 our $plus="+";
 our $minus="-";
 our $FS=',';
+our $nb=0;
 
 my %h;
 if ($#ARGV >= 0){
-	my $lf; my $cf; my $rf;
-	my $nb=''; 
+	my $lf; my $cf; my $rf; my $print;
 
 	GetOptions(	'l|left:s'         => \$lf,
         	   	'r|right:s'        => \$rf,
            		'c|center:s'       => \$cf,
+           		'p|print:s'       => \$print,
            		'F:s'       	   => \$FS,
            		'n|noborder'       => \$nb,
           	);
-	%h=get_details($lf,$cf,$rf,$nb,$FS);
+	%h=get_details($lf,$cf,$rf,$print);
 }else {
 	%h=get_details();
 }
@@ -92,7 +93,7 @@ sub split_csv {
 	    switch($safe_fs) {
 	    	case '\.' {$safe_fs =~ s/\\//g;}
 	    	case '\t' {$safe_fs =~ s/\\t/\t/g;}
-	    	case '\s' {$safe_fs =~ s/\\s/\t/g;}
+	    	case '\s' {$safe_fs =~ s/\\s/ /g;}
 		
 	    }
 
@@ -105,7 +106,6 @@ sub split_csv {
             $i =~ s/\s+/ /g;
     }
 
-		print Dumper(@a);
     return @a;
 }
 
@@ -177,19 +177,33 @@ sub print_center {
 
 sub get_details {
 	my @align = get_align($_[0],$_[1],$_[2]);
-	my $nb = $_[3];
-	my $FS = $_[4];
+	my @print = get_print($_[3]);
 	my @b;
 	my @a;
+	my @d;
 	my @length;
 	my $n_col=0;
-	my $l=0; 
+	my $l=0;
+	
+	my $p_print;
+	if(@print){ $p_print=1; }else{ $p_print=0;}
+ 
 	while (<>){
 		@a= split_csv("$_");
+		unless( $p_print ){
+			for ( my $x=0 ; $x <= $#a; $x++){
+				$print[$x]=$x;	
+			}
+		}
+		my $m=0;
+		foreach my $n (@print){
+			$d[$m] = $a[$n];
+			$m++
+		}
 		my $c=0; 
-		foreach my $i (@a){
-			$i =~ s/^\s+//;
-			$i =~ s/\s+$//;
+		foreach my $i (@d){
+			defined($i) && $i =~ s/^\s+//;
+			defined($i) && $i =~ s/\s+$//;
 			$b[$l][$c] = $i;
 			my $li= length($i);
 			if ( defined( $length[$c] ) ){
@@ -209,6 +223,7 @@ sub get_details {
 			content => \@b,
 			length  => \@length,
 			align => \@align,
+			print => \@print,
 			nb => $nb,
 			n_col => $n_col,
 			FS => $FS,
@@ -222,16 +237,17 @@ sub print_table{
 	my @content=@{$h{"content"}};
 	my @length=@{$h{"length"}};
 	my @align=@{$h{"align"}};
+	my @print=@{$h{"print"}};
 	my $nb=$h{"nb"};
 	my $n_col=$h{"n_col"};
 	my $a=0;
+
+	#print Dumper(\@print);
 	foreach my $line (@content){
 		$nb || print_border(\@length);
 		my $str; 
 		my $b=0;
-		#foreach my $col (@{$content[$a]}){
 		for ( my $z=0; $z < $n_col ; $z++ ){
-			#my $col = $content[$a][$z];
 			my $col = $content[$a][$z];
 			unless (defined($col)) { $col = ""}
 			$col =~ s/"//g;
@@ -291,3 +307,15 @@ sub get_align {
 	return @align;
 }
 
+sub get_print {
+	my $print = $_[0];
+	my @print;
+	defined($print) && (my @a = split(/,/,$print));
+	my $c=1;
+	foreach my $i (@a){
+		$print[$c] = $i-1;
+		$c++;
+	}
+	shift(@print);
+	return @print;
+}
