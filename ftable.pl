@@ -1,7 +1,7 @@
-#! /opt/perl/bin/perl
+#! /usr/bin/env perl
 # Author: Tiago Lopo Da Silva
 # Date: 20/10/2013
-# Purpose: Print formatted table based on csv file
+# Purpose: Print formatted table
 
 use strict; 
 use warnings;
@@ -125,6 +125,7 @@ sub fill_str {
 sub print_border {
 	my @l=@{$_[0]};
 	foreach my $i (@l){
+		unless (defined($i)){$i=1;}
 		print "$plus";
 		my $a=0;
 		while ( $a < ($i+2) ){
@@ -157,6 +158,7 @@ sub print_center {
 	my $l=$_[0];
 	my $col=$_[1];
 	my $str;
+	unless (defined($l)){ $l=1}
 	my $cl=length($col);
 	my $padding=(($l - $cl)/2);
         my $lp; my $rp;
@@ -202,23 +204,24 @@ sub get_details {
 		}
 		my $c=0; 
 		foreach my $i (@d){
-			defined($i) && $i =~ s/^\s+//;
-			defined($i) && $i =~ s/\s+$//;
-			$b[$l][$c] = $i;
-			my $li= length($i);
-			if ( defined( $length[$c] ) ){
-				if( $li > $length[$c] ) {
+				defined($i) && $i =~ s/^\s+//;
+				defined($i) && $i =~ s/\s+$//;
+				$b[$l][$c] = $i;
+				my $li= length($i);
+				if ( defined( $length[$c] ) ){
+					if( $li > $length[$c] ) {
+						$length[$c]=$li;
+					}
+				}else{
 					$length[$c]=$li;
-				}
-			}else{
-				$length[$c]=$li;
-			}	
+				}	
 			$c++; 
 		}
 		if ( $c > $n_col ){ $n_col=$c;}
 		$l++; 
 	
 	}
+
 	my %h= ( 
 			content => \@b,
 			length  => \@length,
@@ -228,6 +231,7 @@ sub get_details {
 			n_col => $n_col,
 			FS => $FS,
 		);
+	
 	return %h;
 }
 
