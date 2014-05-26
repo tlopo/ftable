@@ -36,6 +36,16 @@ Options:
 
 #Examples
 
+ftable handles csv nicely, even when there are comma between quotes:
+```
+~# echo -e 'a,b,c\n"a,b,c",aaa,bbb' | ftable
++-------+-----+-----|
+|   a   |  b  |  c  |
++-------+-----+-----|
+| a,b,c | aaa | bbb |
++-------+-----+-----|
+```
+
 Print all fields centralized(default):
 ```
 ~# egrep 'www-data|ubuntu' /etc/passwd | ftable -F ':' 
@@ -90,16 +100,6 @@ egrep 'www-data|ubuntu' /etc/passwd | ftable -F ':' -p 3,1,6 -l 1,2
 | 1000 | ubuntu   | /home/ubuntu |
 +------+----------+--------------|
 ```
-ftable handle csv nicely, even when having comma inside quotes:
-```
-:~# echo -e 'a,b,c\naaa,bbb,ccc,ddd,"e,f,g,h"' | ftable
-+-----+-----+-----+-----+---------|
-|  a  |  b  |  c  |     |         |
-+-----+-----+-----+-----+---------|
-| aaa | bbb | ccc | ddd | e,f,g,h |
-+-----+-----+-----+-----+---------|
-```
-
 #Installation
 
 Installing ftable is just a matter of downloading from github, making it executable and move somewhere into $PATH
