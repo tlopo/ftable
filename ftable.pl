@@ -17,6 +17,7 @@ our $plus="+";
 our $minus="-";
 our $FS=',';
 our $nb=0;
+our $ho=0;
 
 my %h;
 if ($#ARGV >= 0){
@@ -28,6 +29,7 @@ if ($#ARGV >= 0){
            		'p|print:s'       => \$print,
            		'F:s'       	   => \$FS,
            		'n|noborder'       => \$nb,
+           		'h|header'       => \$ho,
           	) || print_usage();
 
 	%h=get_details($lf,$cf,$rf,$print);
@@ -130,7 +132,7 @@ sub print_border {
 			$counter++;
 		}
 	}
-	print "$pipe\n";
+	print "$plus\n";
 }
 
 sub print_left {
@@ -247,7 +249,12 @@ sub print_table{
 	my $counter=0;
 
 	foreach my $line (@content){
-		$nb || print_border(\@length);
+		if( $ho == 0 ){
+			$nb || print_border(\@length);
+		}elsif( $counter < 2){
+			print_border(\@length);
+		}
+		#$nb || print_border(\@length);
 		my $str; 
 		my $counter2=0;
 		for ( my $i=0; $i < $n_col ; $i++ ){
@@ -397,6 +404,9 @@ Options:
 
   -n, --noborder 
         Do not print border
+
+  -h, --header
+	print vertical border around the header only
 
   -F, --field-separator
         Field separator, if no specified "comma" (,) is the default value
