@@ -292,21 +292,30 @@ sub get_align {
 	my $rf = $_[2];
 	my @align;
 
-	defined($lf) && (my  @lf = split (/,/,$lf));
-	defined($cf) && (my  @cf = split (/,/,$cf));
-	defined($rf) && (my  @rf = split (/,/,$rf));
-
-	foreach my $i (@lf){
-		$align[$i] = "l";	
+	if ( defined($lf) ){
+		$lf = get_range_translated($lf);	
+		my  @lf = split (/,/,$lf);
+		foreach my $i (@lf){
+			$align[$i] = "l";	
+		}
 	}
 
-	foreach my $i (@cf){
-		$align[$i] = "c";	
+	if ( defined($cf) ){	
+		$cf = get_range_translated($cf);	
+		my  @cf = split (/,/,$cf);
+		foreach my $i (@cf){
+			$align[$i] = "c";	
+		}
 	}
 
-	foreach my $i (@rf){
-		$align[$i] = "r";	
+	if ( defined($rf) ){	
+		$rf = get_range_translated($rf);	
+		my  @rf = split (/,/,$rf);
+		foreach my $i (@rf){
+			$align[$i] = "r";	
+		}
 	}
+
 	shift(@align);
 	return @align;
 }
@@ -314,8 +323,12 @@ sub get_align {
 sub get_print {
 # This sub creates an array containing the field numbers  to be printed
 	my $print = $_[0];
-	my @print;
-	defined($print) && (my @a = split(/,/,$print));
+	my @print; my @a;
+
+	if ( defined($print) ){
+		$print = get_range_translated($print);
+		@a = split(/,/,$print);
+	}
 	my $counter=1;
 	foreach my $i (@a){
 		$print[$counter] = $i-1;
@@ -324,6 +337,44 @@ sub get_print {
 	shift(@print);
 	return @print;
 }
+
+sub get_range_translated {
+	my $str=$_[0];
+	while ( $str =~ /(\d+-\d+)/){
+		my $range=$1;
+		$range=translate_range($range);
+		$str =~ s/$1/$range/g;
+	}
+	return $str;
+}
+
+sub translate_range {
+	my $a=$_[0];
+        my @arr= split(/-/,$a);
+     
+        my $start=$arr[0]; 
+        my $end=$arr[1]; 
+     
+        my $range; my $inc; my $cond;
+        if ( $start < $end){
+                $cond='$start <= $end';
+                $inc="++";
+        }else{
+                $cond='$start >= $end'; 
+                $inc="--";
+        }   
+     
+        while (eval $cond ){  
+                if( $start == $end ){
+                        $range.=$start;
+                }else{
+                        $range.=$start.",";    
+                }   
+                eval '$start'.$inc;
+        }   
+        return $range;
+}
+
 
 sub print_usage {
 
