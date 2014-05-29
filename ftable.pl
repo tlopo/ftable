@@ -214,16 +214,18 @@ sub get_details {
 		}
 		$counter2=0; 
 		foreach my $i (@tmp_arr2){
-				defined($i) && $i =~ s/^\s+//;
-				defined($i) && $i =~ s/\s+$//;
-				$content[$counter][$counter2] = $i;
-				my $li= length($i);
-				if ( defined( $length[$counter2] ) ){
-					if( $li > $length[$counter2] ) {
+				if(defined($i)){
+					$i =~ s/^\s+//;
+					$i =~ s/\s+$//;
+					$content[$counter][$counter2] = $i;
+					my $li= length($i);
+					if ( defined( $length[$counter2] ) ){
+						if( $li > $length[$counter2] ) {
+							$length[$counter2]=$li;
+						}
+					}else{
 						$length[$counter2]=$li;
 					}
-				}else{
-					$length[$counter2]=$li;
 				}	
 			$counter2++; 
 		}
