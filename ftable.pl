@@ -30,7 +30,7 @@ if ($#ARGV >= 0){
            		'p|print:s'       => \$print,
            		'F:s'       	   => \$FS,
            		'n|noborder'       => \$nb,
-           		'h|header'       => \$ho,
+           		'H|header'       => \$ho,
            		'license'       => \$license,
           	) || print_usage();
 
@@ -410,8 +410,8 @@ Options:
   -n, --noborder 
         Do not print border
 
-  -h, --header
-	print vertical border around the header only
+  -H, --header
+	print internal horizontal border only below 1st line 
 
   -F, --field-separator
         Field separator, if no specified "comma" (,) is the default value
