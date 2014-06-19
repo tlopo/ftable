@@ -82,7 +82,13 @@ sub special_split {
     $str =~ s/\$/$dollar/g;
     $str =~ s/\(/<op>/g;
     $str =~ s/\)/<cp>/g;
+    $str =~ s/\[/<ob>/g;
+    $str =~ s/\]/<cb>/g;
     $str =~ s/\//<slash>/g;
+    $str =~ s/\\/<bslash>/g;
+    $str =~ s/\?/<qmark>/g;
+    $str =~ s/\+/<plus>/g;
+    $str =~ s/\*/<star>/g;
     my $str1=$str;
     my $qf;
     my @a; 
@@ -106,7 +112,13 @@ sub special_split {
             $i =~ s/$dollar/\$/g;
             $i =~ s/<op>/\(/g;
             $i =~ s/<cp>/\)/g;
+            $i =~ s/<ob>/\[/g;
+            $i =~ s/<cb>/\]/g;
             $i =~ s/<slash>/\//g;
+            $i =~ s/<bslash>/\\/g;
+            $i =~ s/<qmark>/\?/g;
+            $i =~ s/<plus>/\+/g;
+            $i =~ s/<star>/\*/g;
             $i =~ s/["']//g;
             $i =~ s/\s+/ /g;
     }
