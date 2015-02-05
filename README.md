@@ -9,6 +9,16 @@
   * Allows you select the alignment which fields will be printed (left,center,right)
   * Allows you to print a nice ASCII table with borders or not
 
+#Installation
+
+Installing ftable is just a matter of downloading from github, making it executable and move somewhere into $PATH
+
+```
+wget https://raw.githubusercontent.com/tlopo/ftable/master/ftable.pl 
+chmod +x ftable.pl
+sudo mv ftable.pl /usr/local/bin/ftable
+```
+
 ##Usage
 ```
 Usage: ftable [OPTIONS] [FILE]
@@ -100,15 +110,7 @@ egrep 'www-data|ubuntu' /etc/passwd | ftable -F ':' -p 3,1,6 -l 1,2
 | 1000 | ubuntu   | /home/ubuntu |
 +------+----------+--------------+
 ```
-#Installation
 
-Installing ftable is just a matter of downloading from github, making it executable and move somewhere into $PATH
-
-```
-wget https://raw.githubusercontent.com/tlopo/ftable/master/ftable.pl 
-chmod +x ftable.pl
-sudo mf ftable.pl /usr/local/bin/ftable
-```
 
 
 
