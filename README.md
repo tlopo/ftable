@@ -9,7 +9,7 @@
   * Allows you select the alignment which fields will be printed (left,center,right)
   * Allows you to print a nice ASCII table with borders or not
 
-#Installation
+##Installation
 
 Installing ftable is just a matter of downloading from github, making it executable and move somewhere into $PATH
 
@@ -44,7 +44,7 @@ Options:
         Field separator, if no specified "comma" (,) is the default value
 ```
 
-#Examples
+##Examples
 
 ftable handles csv nicely, even when there are comma between quotes:
 ```
