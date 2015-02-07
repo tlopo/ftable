@@ -76,55 +76,83 @@ sub get_translated {
     return $str;
 }
 
-sub special_split {
-#This sub splits strings but taking quoted fields in consideration
-    my $str=$_[0];
-    $str =~ s/\$/$dollar/g;
-    $str =~ s/\(/<op>/g;
-    $str =~ s/\)/<cp>/g;
-    $str =~ s/\[/<ob>/g;
-    $str =~ s/\]/<cb>/g;
-    $str =~ s/\//<slash>/g;
-    $str =~ s/\\/<bslash>/g;
-    $str =~ s/\?/<qmark>/g;
-    $str =~ s/\+/<plus>/g;
-    $str =~ s/\*/<star>/g;
-    my $str1=$str;
-    my $qf;
-    my @a; 
+sub quote_aware_split {
+	my $field_separator = $_[0];
+	my $line = $_[1]; 
+	my $seen_quote = 0; 
+	my $backup_fs = $field_separator; 
+	my @chars = split (//,$line);
+	my $counter; 
 
-    $qf=get_quoted_fields("$str1");
+	if ( length($field_separator) > 1 ) {
+		foreach my $fs (( "\0", "\1", "\3", "\4", "\5")) {
+			unless ( $line =~ /$fs/) {
+				$field_separator = "$fs"; 
+				last; 
+			}
+		}
+	}
 
-    my $translated = get_translated($qf,$str);
-    
-    @a =  split (/$FS/,$translated);
- 
-    foreach my $i ( @a ){
-	    my $safe_fs=$FS;
-	    switch($safe_fs) {
-	    	case '\.' {$safe_fs =~ s/\\//g;}
-	    	case '\t' {$safe_fs =~ s/\\t/\t/g;}
-	    	case '\s' {$safe_fs =~ s/\\s/ /g;}
+	if ( $line =~ /('|")/ ) {
+		my $buffer;
+		my $tmp_line; 
+		$counter = 0 ; 
+		foreach my $char (@chars) {
+			$counter++; 
+			$buffer .= $char; 
+			if ( $char eq '"' || $char eq "'" || $counter == scalar(@chars)) {
+
+				unless ( $seen_quote ) {
+					$buffer =~ s/$backup_fs/$field_separator/g;
+					$tmp_line .= $buffer;
+					$buffer=""; 
+				}else {
+					$tmp_line .= $buffer;
+					$buffer = "";
+				}
+
+				$seen_quote = $seen_quote ? 0 : 1; 
+			}
+			
+		}
+	
+		@chars = split (//,$tmp_line);
+	}else{ 
+		$line =~ s/$backup_fs/$field_separator/g ;
+		@chars = split (//,$line);
+	}
+
+	$seen_quote = 0; 
+	my @array; 
+	my $previous_char=""; 
+	my $current_field="";
+
+	$counter=1; 
+	foreach my $char(@chars) {
 		
-	    }
+		if ( $char eq '"' || $char eq "'") {
+			if ( $previous_char ne q(\\) ) {
+				$current_field .= $char;
+				$previous_char = $char;
+				$seen_quote = $seen_quote ? 0 : 1; 
+			}
+		}
 
-            $i =~ s/$comma/$safe_fs/eg;
-            $i =~ s/$dollar/\$/g;
-            $i =~ s/<op>/\(/g;
-            $i =~ s/<cp>/\)/g;
-            $i =~ s/<ob>/\[/g;
-            $i =~ s/<cb>/\]/g;
-            $i =~ s/<slash>/\//g;
-            $i =~ s/<bslash>/\\/g;
-            $i =~ s/<qmark>/\?/g;
-            $i =~ s/<plus>/\+/g;
-            $i =~ s/<star>/\*/g;
-            $i =~ s/["']//g;
-            $i =~ s/\s+/ /g;
-    }
-
-    return @a;
+		elsif( ($char eq $field_separator && ! $seen_quote) || $counter == scalar(@chars) ) {
+			push (@array,$current_field); 
+			$current_field="";	
+		}
+		
+		else {
+			$current_field .= $char;
+			$previous_char=$char;  
+		}
+		
+		$counter++
+	}
+	return @array; 
 }
+
 
 sub fill_str {
 # This sub fills the string with padding chars
@@ -213,7 +241,7 @@ sub get_details {
 	if(@print){ $p_print=1; }else{ $p_print=0;}
  
 	while (<>){
-		@tmp_arr= special_split("$_");
+		@tmp_arr= quote_aware_split("$FS","$_");
 		unless( $p_print ){
 			for ( my $i=0 ; $i <= $#tmp_arr; $i++){
 				$print[$i]=$i;	
