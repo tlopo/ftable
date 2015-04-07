@@ -7,6 +7,7 @@ use strict;
 use warnings;
 use POSIX;
 use Switch;
+use Text::CSV;
 use Getopt::Long qw(:config no_ignore_case);
 use Data::Dumper;
 
@@ -19,6 +20,7 @@ our $FS=',';
 our $nb=0;
 our $ho=0;
 our $license=0;
+our $csv;
 
 my %h;
 if ($#ARGV >= 0){
@@ -35,11 +37,21 @@ if ($#ARGV >= 0){
           	) || print_usage();
 
 	$license && print_license();
+	create_csv();
 	%h=get_details($lf,$cf,$rf,$print);
 }else {
+	create_csv();
 	%h=get_details();
 }
 print_table(\%h);
+
+sub create_csv {
+	$csv =  Text::CSV->new({
+		binary => 1,
+		sep_char => $FS
+		}) or die "Cannot uset CSV " . Text::CSV->error_diag();
+
+}
 
 sub get_quoted_fields {
 # this sub finds quoted fields
@@ -77,82 +89,9 @@ sub get_translated {
 }
 
 sub quote_aware_split {
-	my $field_separator = $_[0];
-	my $line = $_[1]; 
-	my $seen_quote = 0; 
-	my $backup_fs = $field_separator; 
-	my @chars = split (//,$line);
-	my $counter; 
-
-	if ( length($field_separator) > 1 ) {
-		foreach my $fs (( "\0", "\1", "\3", "\4", "\5")) {
-			unless ( $line =~ /$fs/) {
-				$field_separator = "$fs"; 
-				last; 
-			}
-		}
-	}
-
-	if ( $line =~ /('|")/ ) {
-		my $buffer;
-		my $tmp_line; 
-		$counter = 0 ; 
-		foreach my $char (@chars) {
-			$counter++; 
-			$buffer .= $char; 
-			if ( $char eq '"' || $char eq "'" || $counter == scalar(@chars)) {
-
-				unless ( $seen_quote ) {
-					$buffer =~ s/$backup_fs/$field_separator/g;
-					$tmp_line .= $buffer;
-					$buffer=""; 
-				}else {
-					$tmp_line .= $buffer;
-					$buffer = "";
-				}
-
-				$seen_quote = $seen_quote ? 0 : 1; 
-			}
-			
-		}
-	
-		@chars = split (//,$tmp_line);
-	}else{ 
-		$line =~ s/$backup_fs/$field_separator/g ;
-		@chars = split (//,$line);
-	}
-
-	$seen_quote = 0; 
-	my @array; 
-	my $previous_char=""; 
-	my $current_field="";
-
-	$counter=1; 
-	foreach my $char(@chars) {
-		
-		if ( $char eq '"' || $char eq "'") {
-			if ( $previous_char ne q(\\) ) {
-				$current_field .= $char;
-				$previous_char = $char;
-				$seen_quote = $seen_quote ? 0 : 1; 
-			}
-		}
-
-		elsif( ($char eq $field_separator && ! $seen_quote) || $counter == scalar(@chars) ) {
-			push (@array,$current_field); 
-			$current_field="";	
-		}
-		
-		else {
-			$current_field .= $char;
-			$previous_char=$char;  
-		}
-		
-		$counter++
-	}
-	return @array; 
+	$csv->parse($_[0]);
+	return $csv->fields();
 }
-
 
 sub fill_str {
 # This sub fills the string with padding chars
@@ -241,7 +180,7 @@ sub get_details {
 	if(@print){ $p_print=1; }else{ $p_print=0;}
  
 	while (<>){
-		@tmp_arr= quote_aware_split("$FS","$_");
+		@tmp_arr= quote_aware_split("$_");
 		unless( $p_print ){
 			for ( my $i=0 ; $i <= $#tmp_arr; $i++){
 				$print[$i]=$i;	
