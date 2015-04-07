@@ -1,6 +1,6 @@
 # ftable
 
-  ftable is a command line tool to print fomatted tables. It's written in Perl and it has no dependencies outside perl core modules.
+  ftable is a command line tool to print fomatted tables. It's written in Perl and it has few dependencies outside perl core modules (see installation section).
   
   It does the following:
   
@@ -17,6 +17,16 @@ Installing ftable is just a matter of downloading from github, making it executa
 wget https://raw.githubusercontent.com/tlopo/ftable/master/ftable.pl 
 chmod +x ftable.pl
 sudo mv ftable.pl /usr/local/bin/ftable
+```
+ftable uses 2 modules not included on perl core, they are Text::CSV and Switch. To install them:
+
+Debian based distro:
+```
+sudo apt-get install libswitch-perl libtext-csv-perl
+```
+Red Hat based distro:
+```
+sudo yum install perl-Switch perl-Text-CSV
 ```
 
 ##Usage
